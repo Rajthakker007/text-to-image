@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text on Images</title>
+</head>
+<body>
+    <h1>Add Text to Images</h1>
+
+    <form id="imageForm" enctype="multipart/form-data" action="javascript:void(0);">
+        <h2>Image and Text Pairs</h2>
+        <div id="imagePairs">
+            <!-- Generate all 35 pairs with a loop -->
+            <script>
+                for (let i = 0; i < 35; i++) {
+                    document.write(`
+                        <input type="file" id="imageInput${i}" accept="image/*">
+                        <br>
+                        <textarea id="textInput${i}" rows="4" cols="50" placeholder="Enter text here"></textarea>
+                        <br>
+                    `);
+                }
+            </script>
+        </div>
+        <br>
+        <button id="submitBtn" type="submit">Save Images</button>
+    </form>
+
+    <script>
+        function saveImageWithText(imageData, text, filename) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            const image = new Image();
+            image.onload = function() {
+                canvas.width = image.width;
+                canvas.height = image.height;
+                context.drawImage(image, 0, 0, image.width, image.height);
+                context.font = '30px Arial';
+                context.fillText(text, 10, 30);
+
+                const dataURL = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = dataURL;
+                a.download = filename;
+                a.click();
+            };
+            image.src = imageData;
+        }
+
+        function addTextToImage(imageInputId, textInputId) {
+            const imageInput = document.getElementById(imageInputId);
+            const textInput = document.getElementById(textInputId).value;
+
+            if (imageInput.files && imageInput.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Save the image with text to the "images" folder
+                    saveImageWithText(e.target.result, textInput, `images/image_${Date.now()}.png`);
+                };
+
+                reader.readAsDataURL(imageInput.files[0]);
+            }
+        }
+
+        document.getElementById('imageForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            for (let i = 0; i < 35; i++) {
+                const imageInputId = `imageInput${i}`;
+                const textInputId = `textInput${i}`;
+                addTextToImage(imageInputId, textInputId);
+            }
+        });
+    </script>
+</body>
+</html>
